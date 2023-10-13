@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body style="padding: 20px;">
+    <div class="header">
+        <h3 style="justify-content:center">RealtimeChat system </h3>
+    </div>
+    <div class="card">
+        
+        <div class="roomid">
+            <h5>Room Number : <span id="shworoomid">?</span></h5>
+        </div>
+        <div class="user-detail">
+            <img src="img/a1.jpg" alt="" class="user">
+            
+            <h4 id="showUsername">Boatenigne User</h4>
+        </div>
+        <div id="render" class="renderchat">
+            <!-- <div class="chat-incoming">
+                <img src="img/a1.jpg" alt="" class="user" style="width:30px; height:30px">
+                <span>Hello World</span>
+            </div>
+            <div class="chat-outcoming">
+                <span>Hello World</span>
+                <img src="img/a1.jpg" alt="" class="user" style="width:30px; height:30px">
+            </div>
+             -->
+        </div>
+        <div class="sendmsg">
+            <input id="txtMsg" class="form-control" placeholder="Message..." type="text">
+            <button id="btnSend" class="btn-primary">Send</button>
+        </div>
+    </div>
+    <script type="module">
+        // Import the functions you need from the SDKs you need
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.4.0/firebase-app.js";
+        import { getDatabase,set,push,ref,onValue } from "https://www.gstatic.com/firebasejs/10.4.0/firebase-database.js";
+        // TODO: Add SDKs for Firebase products that you want to use
+        // https://firebase.google.com/docs/web/setup#available-libraries
+      
+        // Your web app's Firebase configuration
+        // For Firebase JS SDK v7.20.0 and later, measurementId is optional
+        const firebaseConfig = {
+          apiKey: "AIzaSyCPAB26oboCRk-qY1_xal2YtcrKAkYu58A",
+          authDomain: "realtimeapplication-196e8.firebaseapp.com",
+          databaseURL: "https://realtimeapplication-196e8-default-rtdb.asia-southeast1.firebasedatabase.app",
+          projectId: "realtimeapplication-196e8",
+          storageBucket: "realtimeapplication-196e8.appspot.com",
+          messagingSenderId: "165790459138",
+          appId: "1:165790459138:web:66b06a3eb2b671634c0e1b",
+          measurementId: "G-1WBQD46KTY"
+        };
+      
+        // Initialize Firebase
+        const app = initializeApp(firebaseConfig);
+        const db = getDatabase(app)
+
+        const user = window.prompt('กรอกชื่อ..')
+        console.log(user);
+        document.querySelector('#showUsername').innerHTML = user;
+
+        const room = window.prompt('กรอกหมายเลขห้อง..')
+        console.log(room);
+        document.querySelector('#shworoomid').innerHTML = room;
+
+        const btnSend = document.querySelector('#btnSend');
+        const txtMsg = document.querySelector('#txtMsg');
+        btnSend.addEventListener('click', () => {
+            //action
+            set(push(ref(db, room)), {
+                username: user,
+                msg: txtMsg.value
+            })
+            txtMsg.value = '';
+        })
+
+        onValue(ref(db, room), (snapshot) => {
+            const data = snapshot.val();
+            var html = '';
+            snapshot.forEach((childSnapshot) => {
+                //console.log('for',childSnapshot)
+                var key = childSnapshot.key;
+                var val = childSnapshot.val();
+                //console.log(val);
+                if(data[key].username != user) {
+                    console.log('not my message');
+                    html += `<div class="chat-incoming">
+                                <img src="img/a1.jpg" alt="" class="user" style="width:30px; height:30px">
+                                <span>${data[key].msg}</span>
+                            </div>`
+                }else {
+                    console.log('my message');
+                    html += `<div class="chat-outcoming">
+                                <span>${data[key].msg}</span>
+                                <img src="img/a1.jpg" alt="" class="user" style="width:30px; height:30px">
+                            </div>`
+                }
+            })
+            document.querySelector('#render').innerHTML = html;
+        })
+      </script>
+</body>
+</html>
